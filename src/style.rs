@@ -10,9 +10,9 @@
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RGB {
-    r: u8,
-    g: u8,
-    b: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -73,10 +73,10 @@ impl Default for Modifier {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Style {
-    fg: Option<Color>,
-    bg: Option<Color>,
-    add_modifiers: Modifier,
-    sub_modifiers: Modifier,
+    pub fg: Option<Color>,
+    pub bg: Option<Color>,
+    pub add_modifiers: Modifier,
+    pub sub_modifiers: Modifier,
 }
 
 impl Style {

@@ -38,6 +38,10 @@ impl Cell {
         self.symbol
     }
 
+    pub fn get_style(&self) -> &Style {
+        &self.style
+    }
+
     /// Sets the style of the cell.
     pub fn set_style(&mut self, style: Style) {
         self.style = style;
@@ -46,8 +50,8 @@ impl Cell {
 
 /// A 2D grid of `Cell`s, represented internally as a 1D array for memory efficiency.
 pub struct Buffer {
-    width: u16,
-    height: u16,
+    pub width: u16,
+    pub height: u16,
     content: Vec<Cell>,
 }
 
@@ -132,6 +136,12 @@ impl Buffer {
         } else {
             let idx = ((y * self.width) + x) as usize;
             self.content.get_mut(idx)
+        }
+    }
+
+    pub fn reset(&mut self) {
+        for cell in self.content.iter_mut() {
+            cell.reset();
         }
     }
 }
