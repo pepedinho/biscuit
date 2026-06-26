@@ -1,6 +1,9 @@
 use std::{thread, time::Duration};
 
-use biscuit::{Color, Style, Terminal};
+use biscuit::{
+    Color, Style, Terminal,
+    widgets::{Label, Widget},
+};
 
 fn main() -> Result<(), std::io::Error> {
     let mut terminal = Terminal::new(80, 24)?;
@@ -11,6 +14,9 @@ fn main() -> Result<(), std::io::Error> {
             let style = Style::new().fg(Color::Cyan).bold();
 
             frame.buffer.set_string(10, 10, &msg, style);
+            Label::new("Hello from label")
+                .style(Style::new().bold().fg(Color::Green))
+                .render(frame.size(), frame.buffer);
 
             let help = "Wait 5 seconds...";
             let help_style = Style::new().fg(Color::Yellow).dim();

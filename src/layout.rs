@@ -5,12 +5,27 @@
 
 use std::cmp;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Direction {
+    Horizontal,
+    #[default]
+    Vertical,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Constraint {
+    Length(u16),
+    Percentage(u16),
+    Min(u16),
+    Fill(u16),
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Rect {
-    x: u16,
-    y: u16,
-    width: u16,
-    height: u16,
+    pub x: u16,
+    pub y: u16,
+    pub width: u16,
+    pub height: u16,
 }
 
 impl Rect {
@@ -54,6 +69,116 @@ impl Rect {
         } else {
             Some(Rect::new(x1, y1, x2 - x1, y2 - y1))
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Layout<'a> {
+    direction: Direction,
+    constraints: &'a [Constraint],
+}
+
+impl<'a> Default for Layout<'a> {
+    fn default() -> Self {
+        Self {
+            direction: Direction::Vertical,
+            constraints: &[],
+        }
+    }
+}
+
+impl<'a> Layout<'a> {
+    /// Creates a nesw [`Layout`]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Builder pattern for direction
+    pub const fn direction(mut self, direction: Direction) -> Self {
+        self.direction = direction;
+        self
+    }
+
+    /// Builder pattern for constraints
+    pub const fn constraints(mut self, constraints: &'a [Constraint]) -> Self {
+        self.constraints = constraints;
+        self
+    }
+
+    /// Split a [`Rect`] into a Vec of sub-[`Rect`] while respecting the constraints.
+    pub fn split(&self, area: Rect) -> Vec<Rect> {
+        let mut results = Vec::with_capacity(self.constraints.len());
+
+        let available_space = if self.direction == Direction::Horizontal {
+            area.width
+        } else {
+            area.height
+        };
+
+        let mut fill_total: u16 = 0;
+        let mut fixed_space: u16 = 0;
+        let mut sizes = vec![0; self.constraints.len()];
+
+        for (i, constraint) in self.constraints.iter().enumerate() {
+            match constraint {
+                Constraint::Length(l) => {
+                    sizes[i] = *l;
+                    fixed_space += *l;
+                }
+                Constraint::Percentage(p) => {
+                    let l = ((available_space as u32 * *p as u32) / 100) as u16;
+                    sizes[i] = l;
+                    fixed_space += l;
+                }
+                Constraint::Min(m) => {
+                    sizes[i] = *m;
+                    fixed_space += *m;
+                    fill_total += 1;
+                }
+                Constraint::Fill(f) => {
+                    sizes[i] = 0;
+                    fill_total += *f;
+                }
+            }
+        }
+
+        let remaining = available_space.saturating_sub(fixed_space);
+
+        if remaining > 0 && fill_total > 0 {
+            let mut space_to_distribute = remaining;
+            let mut fill_left = fill_total;
+
+            for (i, constraint) in self.constraints.iter().enumerate() {
+                let weight = match constraint {
+                    Constraint::Min(_) => 1,
+                    Constraint::Fill(f) => *f,
+                    _ => 0,
+                };
+
+                if weight > 0 {
+                    let extra =
+                        ((space_to_distribute as u32 * weight as u32) / fill_left as u32) as u16;
+                    sizes[i] += extra;
+                    space_to_distribute -= extra;
+                    fill_left -= weight;
+                }
+            }
+        }
+
+        let mut current_x = area.x;
+        let mut current_y = area.y;
+
+        for size in sizes {
+            if self.direction == Direction::Horizontal {
+                results.push(Rect::new(current_x, current_y, size, area.height));
+                current_x += size;
+            } else {
+                results.push(Rect::new(current_x, current_y, area.width, size));
+                current_y += size;
+            }
+        }
+
+        results
     }
 }
 
