@@ -19,6 +19,12 @@ pub struct VStack<'a> {
     children: Vec<Child<'a>>,
 }
 
+impl<'a> Default for VStack<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> VStack<'a> {
     pub fn new() -> Self {
         Self {
@@ -49,6 +55,12 @@ impl<'a> Widget for VStack<'a> {
 
 pub struct HStack<'a> {
     children: Vec<Child<'a>>,
+}
+
+impl<'a> Default for HStack<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<'a> HStack<'a> {

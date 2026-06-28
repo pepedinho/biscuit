@@ -8,6 +8,7 @@
 //! for colors and bitsets for modifiers, styles can be patched and merged together
 //! to cascade visual properties (similar to CSS inheritance).
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RGB {
     pub r: u8,
@@ -71,12 +72,42 @@ impl Default for Modifier {
     }
 }
 
+pub trait Stylize: Sized {
+    fn into_style(self) -> Style;
+
+    fn bold(self) -> Style {
+        self.into_style().bold()
+    }
+
+    fn dim(self) -> Style {
+        self.into_style().dim()
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Style {
     pub fg: Option<Color>,
     pub bg: Option<Color>,
     pub add_modifiers: Modifier,
     pub sub_modifiers: Modifier,
+}
+
+impl Stylize for Style {
+    fn into_style(self) -> Style {
+        self
+    }
+}
+
+impl Stylize for Color {
+    fn into_style(self) -> Style {
+        Style::new().fg(self)
+    }
+}
+
+impl From<Color> for Style {
+    fn from(color: Color) -> Self {
+        Style::new().fg(color)
+    }
 }
 
 impl Style {

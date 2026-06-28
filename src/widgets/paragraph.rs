@@ -15,8 +15,8 @@ impl<'a> Paragraph<'a> {
         }
     }
 
-    pub const fn style(mut self, style: Style) -> Self {
-        self.style = style;
+    pub fn style<S: Into<Style>>(mut self, style: S) -> Self {
+        self.style = style.into();
         self
     }
 

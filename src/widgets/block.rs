@@ -56,14 +56,19 @@ impl Block {
         Self::default()
     }
 
+    /// Creates a full bordered block.
+    pub fn bordered() -> Self {
+        Self::new().borders(Borders::ALL)
+    }
+
     /// Creates a block and apply borders on it.
     pub const fn borders(mut self, borders: Borders) -> Self {
         self.borders = borders;
         self
     }
 
-    pub const fn style(mut self, style: Style) -> Self {
-        self.style = style;
+    pub fn style<S: Into<Style>>(mut self, style: S) -> Self {
+        self.style = style.into();
         self
     }
 
